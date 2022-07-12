@@ -2,27 +2,27 @@ const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
-const userRouter = require('./routes/userRoutes')
-const academyRouter = require('./routes/academyRoutes')
+const { readdirSync } = require('fs')
 
 dotenv.config()
 const app = express()
 app.use(express.json())
 app.use(cors())
 
+//routes
+readdirSync('./routes').map((r) => app.use('/', require('./routes/' + r)))
+
+//database connection
+
 mongoose
-  .connect(process.env.DB)
+  .connect(process.env.DATABASE_URL)
   .then(() => {
     console.log('DATABASE CONNECTED SUCCESSFULLY!!!!!')
   })
   .catch((err) => {
     console.log(err)
   })
-
-app.use('/api/users', userRouter)
-app.use('/api/academy', academyRouter)
-
-const PORT = process.env.PORT || 4500
+const PORT = process.env.PORT || 8000
 
 app.listen(PORT, () => {
   console.log(`Server is listening to port ${PORT}!!!!!!!`)

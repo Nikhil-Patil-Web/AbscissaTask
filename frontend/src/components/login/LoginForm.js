@@ -1,0 +1,115 @@
+import { Formik, Form } from 'formik'
+import { Link } from 'react-router-dom'
+import LogInInput from '../../components/inputs/logininputs'
+import { useState } from 'react'
+import * as Yup from 'yup'
+import DotLoader from 'react-spinners/DotLoader'
+import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import Cookies from 'js-cookie'
+import { useNavigate } from 'react-router-dom'
+
+const loginInfos = {
+  email: '',
+  password: '',
+}
+
+export default function LoginForm({ setVisible }) {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [login, setLogin] = useState(loginInfos)
+  const { email, password } = login
+  const handleLoginChange = (e) => {
+    const { name, value } = e.target
+    setLogin({ ...login, [name]: value })
+  }
+  const loginValidation = Yup.object({
+    email: Yup.string()
+      .required('Email address is required')
+      .email('Must be a valid email')
+      .max(100),
+    password: Yup.string().required('Password is a required field'),
+  })
+
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState('')
+  const loginSubmit = async () => {
+    try {
+      setLoading(true)
+      const { data } = await axios.post(`http://localhost:8000/login`, {
+        email,
+        password,
+      })
+      dispatch({ type: 'LOGIN', payload: data })
+      Cookies.set('user', JSON.stringify(data))
+      navigate('/')
+    } catch (error) {
+      setLoading(false)
+      setError(error.response.data.message)
+    }
+  }
+
+  return (
+    <div className='login_wrap'>
+      <div className='login_1'>
+        <div className='title'>
+          <div className='letter'>T</div>
+          <div className='letter'>R</div>
+          <div className='letter'>A</div>
+          <div className='letter'>K</div>
+          <div className='letter'>K</div>
+        </div>
+        <span>TRAKK helps you find the best sporting academies near you.</span>
+      </div>
+      <div className='login_2'>
+        <div className='login_2_wrap'>
+          <Formik
+            enableReinitialize
+            initialValues={{ email, password }}
+            validationSchema={loginValidation}
+            onSubmit={() => {
+              loginSubmit()
+            }}
+          >
+            {(formik) => (
+              <Form>
+                <LogInInput
+                  type='text'
+                  name='email'
+                  placeholder='Email address or phone number'
+                  onChange={handleLoginChange}
+                ></LogInInput>
+                <LogInInput
+                  type='password'
+                  name='password'
+                  placeholder='Password'
+                  onChange={handleLoginChange}
+                  bottom
+                ></LogInInput>
+                <button type='submit' className='blue_btn'>
+                  Login
+                </button>
+              </Form>
+            )}
+          </Formik>
+
+          <Link to='/reset' className='forgot_password'>
+            Forgotten Password
+          </Link>
+          <DotLoader color='#187672' loading={loading} size={30}></DotLoader>
+          {error && <div className='error_text'>{error}</div>}
+          <div className='sign_splitter'></div>
+          <button
+            className='blue_btn open_signup'
+            onClick={() => setVisible(true)}
+          >
+            Create Account
+          </button>
+        </div>
+        <Link to='/' className='sign_extra'>
+          <b>Create a page</b> for a celebrity, brand, or business.
+        </Link>
+      </div>
+    </div>
+  )
+}

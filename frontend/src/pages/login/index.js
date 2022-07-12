@@ -1,17 +1,19 @@
-import './index.css'
-import Header from '../../components/Header'
-import Animation from '../../components/Animation'
-import LoginForm from '../../components/LoginForm'
-import Footer from '../../components/Footer'
+import './style.css'
+
+import LoginForm from '../../components/login/LoginForm'
+import Footer from '../../components/login/Footer'
+import Register from '../../components/login/Register'
+import { useState } from 'react'
+
 export default function Login() {
+  const [visible, setVisible] = useState(false)
   return (
     <div className='login'>
-      <Header></Header>
-      <div className='login_middle'>
-        <Animation></Animation>
-        <LoginForm></LoginForm>
+      <div className='login_wrapper'>
+        <LoginForm setVisible={setVisible}></LoginForm>
+        {visible && <Register setVisible={setVisible}></Register>}
+        <Footer></Footer>
       </div>
-      <Footer></Footer>
     </div>
   )
 }
